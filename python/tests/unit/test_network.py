@@ -5,6 +5,7 @@ from traffic_control.network import (
     to_networkx, validate_flow_conservation, validate_capacities,
     validate_connectivity, validate_network, find_bottlenecks,
     load_network_json, save_network_json, generate_four_junction_example,
+    generate_manhattan_example, generate_roundabout_example,
 )
 from traffic_control.models import Network, Junction, Road
 import tempfile
