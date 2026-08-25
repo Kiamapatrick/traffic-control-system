@@ -163,7 +163,7 @@ traffic-control-system/
 
 ## Development Phases
 
-### Phase 1: Python Core Package (Week 1-2) [Done]
+### Phase 1: Python Core Package (Week 1-2) [Scaffolded - Needs Verification]
 - [x] Project structure with `pyproject.toml` (uv)
 - [x] Domain models: Network, Junction, Road, FlowSolution
 - [x] RREF solver (ported from notebook)
@@ -174,10 +174,11 @@ traffic-control-system/
 - [x] Typer CLI with solve/validate/generate commands
 - [x] FastAPI with JWT authentication
 - [x] MongoDB integration (Beanie ODM)
-- [x] Unit tests (80%+), property-based tests (Hypothesis)
-- [x] Integration tests for API
+- [ ] Unit tests (80%+) - scaffolded, needs dependency install to verify
+- [ ] Property-based tests (Hypothesis) - scaffolded
+- [ ] Integration tests for API - scaffolded
 
-### Phase 2: ML Pipeline with SUMO Data (Week 2-3) [Done]
+### Phase 2: ML Pipeline with SUMO Data (Week 2-3) [Scaffolded]
 - [x] SUMO simulation setup & network generation
 - [x] Data pipeline: SUMO → features → training data
 - [x] Feature engineering: time, topology, demand patterns
@@ -188,25 +189,25 @@ traffic-control-system/
 - [x] Notebook: `sumo_ml_pipeline.ipynb`
 - [x] Synthetic data fallback when SUMO unavailable
 
-### Phase 3: Rust Implementation (Week 3-4) [Done]
+### Phase 3: Rust Implementation (Week 3-4) [Scaffolded]
 - [x] Cargo workspace with nalgebra, petgraph, clap
 - [x] Domain models with serde
 - [x] RREF solver (nalgebra)
 - [x] Simplex LP solver
 - [x] Dinic's max flow (petgraph)
 - [x] CLI parity with Python
-- [x] Criterion benchmarks vs Python
-- [x] Optional: WASM compilation
+- [ ] Criterion benchmarks vs Python - needs cargo to verify
+- [ ] Optional: WASM compilation
 
-### Phase 4: TypeScript Implementation (Week 4) [Done]
+### Phase 4: TypeScript Implementation (Week 4) [Scaffolded]
 - [x] Types matching Python Pydantic models
 - [x] Gaussian elimination in TS
 - [x] Simplex implementation
 - [x] Network validation utilities
-- [x] Vitest tests with shared fixtures
-- [x] Benchmark comparison page
+- [ ] Vitest tests with shared fixtures - needs npm to verify
+- [ ] Benchmark comparison page
 
-### Phase 5: React/Next.js Frontend (Week 4-5) [Done]
+### Phase 5: React/Next.js Frontend (Week 4-5) [Scaffolded]
 - [x] Next.js 14 App Router + TypeScript + Tailwind
 - [x] Network editor (React Flow)
 - [x] Real-time flow visualization
@@ -217,15 +218,17 @@ traffic-control-system/
 - [x] WebSocket live simulation
 - [x] Static export for GitHub Pages
 
-### Phase 6: DevOps & Documentation (Week 5-6) [Done]
+### Phase 6: DevOps & Documentation (Week 5-6) [Scaffolded]
 - [x] GitHub Actions CI (lint, type-check, test, build)
 - [x] GitHub Actions: cargo test, bench, clippy
 - [x] GitHub Actions: npm test, build, deploy to Pages
 - [x] Multi-stage Docker builds
 - [x] docker-compose for local stack
-- [x] MkDocs documentation (ARCHITECTURE.md)
+- [x] Architecture documentation (ARCHITECTURE.md)
 - [x] ADRs for key decisions
 - [x] Root README with badges, diagrams, quickstart
+
+> **Note**: All phases are scaffolded with complete implementations. The "[Done]" items above indicate code is written; items with [ ] need dependency installation and test execution to verify. Run `make check` locally to verify all phases.
 
 ## API Reference
 
