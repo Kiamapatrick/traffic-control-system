@@ -53,6 +53,8 @@ dev = [
 ml = [
     "xgboost>=2.0.0",
     "lightgbm>=4.2.0",
+    "skl2onnx>=1.15.0",
+    "onnxruntime>=1.16.0",
 ]
 ortools = [
     "ortools>=9.8.0",

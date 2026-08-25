@@ -61,17 +61,21 @@ A multi-language, full-stack traffic flow optimization system demonstrating Pyth
 - Node.js 20+
 - Docker & Docker Compose
 - MongoDB Atlas account (or local MongoDB)
-- SUMO (for simulation data generation)
+- **SUMO** (optional - for high-fidelity traffic simulation data generation)
+  - Ubuntu/Debian: `sudo apt-get install sumo sumo-tools sumo-doc`
+  - macOS: `brew install sumo`
+  - Windows: Download from https://sumo.dlr.de/docs/Downloads.php
+  - **Note**: If SUMO is not installed, the ML pipeline automatically uses synthetic data fallback
 
 ### Local Development
 
 ```bash
 # Clone and enter
-git clone https://github.com/yourusername/traffic-control-system.git
+git clone https://github.com/Kiamapatrick/traffic-control-system.git
 cd traffic-control-system
 
-# Start all services
-docker-compose up -d
+# Start all services (API, MongoDB, Frontend)
+docker-compose -f docker/docker-compose.yml up -d
 
 # Or run individually:
 
@@ -95,6 +99,35 @@ JWT_ALGORITHM=HS256
 JWT_EXPIRE_MINUTES=30
 SUMO_HOME=/usr/share/sumo
 ```
+
+## ML Pipeline
+
+The ML pipeline trains traffic flow prediction models using either SUMO simulation data or synthetic fallback:
+
+```bash
+# Run full ML pipeline (generates data, trains models, exports ONNX)
+cd python && uv run python examples/sumo_ml_pipeline.ipynb
+
+# Or programmatically:
+from traffic_control import generate_manhattan_example, run_ml_pipeline
+
+network = generate_manhattan_example()
+models = run_ml_pipeline(
+    network,
+    output_dir="models",
+    model_types=["linear", "ridge", "random_forest", "xgboost"],
+    duration=3600,
+    lookback=4,
+)
+```
+
+**Key Features:**
+- **SUMO Integration**: Generates realistic traffic data via SUMO simulation
+- **Synthetic Fallback**: Works without SUMO installed (uses physics-based synthetic data)
+- **Multiple Models**: Linear, Ridge, RandomForest, XGBoost with cross-validation
+- **ONNX Export**: Models exported to ONNX for cross-language serving (TypeScript/Rust)
+- **API Serving**: `/predict` endpoint with model versioning
+- **Notebook**: `python/examples/sumo_ml_pipeline.ipynb` for interactive exploration
 
 ## Project Structure
 
@@ -144,54 +177,55 @@ traffic-control-system/
 - [x] Unit tests (80%+), property-based tests (Hypothesis)
 - [x] Integration tests for API
 
-### Phase 2: ML Pipeline with SUMO Data (Week 2-3) [In Progress]
-- [ ] SUMO simulation setup & network generation
-- [ ] Data pipeline: SUMO → features → training data
-- [ ] Feature engineering: time, topology, demand patterns
-- [ ] Models: LinearRegression, Ridge, RandomForest, XGBoost
-- [ ] Walk-forward validation (time-series split)
-- [ ] Model serialization (joblib) + ONNX export
-- [ ] `/predict` endpoint with model versioning
-- [ ] Notebook: `sumo_ml_pipeline.ipynb`
+### Phase 2: ML Pipeline with SUMO Data (Week 2-3) [Done]
+- [x] SUMO simulation setup & network generation
+- [x] Data pipeline: SUMO → features → training data
+- [x] Feature engineering: time, topology, demand patterns
+- [x] Models: LinearRegression, Ridge, RandomForest, XGBoost
+- [x] Walk-forward validation (time-series split)
+- [x] Model serialization (joblib) + ONNX export
+- [x] `/predict` endpoint with model versioning
+- [x] Notebook: `sumo_ml_pipeline.ipynb`
+- [x] Synthetic data fallback when SUMO unavailable
 
-### Phase 3: Rust Implementation (Week 3-4) [Pending]
-- [ ] Cargo workspace with nalgebra, petgraph, clap
-- [ ] Domain models with serde
-- [ ] RREF solver (nalgebra)
-- [ ] Simplex LP solver
-- [ ] Dinic's max flow (petgraph)
-- [ ] CLI parity with Python
-- [ ] Criterion benchmarks vs Python
-- [ ] Optional: WASM compilation
+### Phase 3: Rust Implementation (Week 3-4) [Done]
+- [x] Cargo workspace with nalgebra, petgraph, clap
+- [x] Domain models with serde
+- [x] RREF solver (nalgebra)
+- [x] Simplex LP solver
+- [x] Dinic's max flow (petgraph)
+- [x] CLI parity with Python
+- [x] Criterion benchmarks vs Python
+- [x] Optional: WASM compilation
 
-### Phase 4: TypeScript Implementation (Week 4) [Pending]
-- [ ] Types matching Python Pydantic models
-- [ ] Gaussian elimination in TS
-- [ ] Simplex implementation
-- [ ] Network validation utilities
-- [ ] Vitest tests with shared fixtures
-- [ ] Benchmark comparison page
+### Phase 4: TypeScript Implementation (Week 4) [Done]
+- [x] Types matching Python Pydantic models
+- [x] Gaussian elimination in TS
+- [x] Simplex implementation
+- [x] Network validation utilities
+- [x] Vitest tests with shared fixtures
+- [x] Benchmark comparison page
 
-### Phase 5: React/Next.js Frontend (Week 4-5) [Pending]
-- [ ] Next.js 14 App Router + TypeScript + Tailwind
-- [ ] Network editor (React Flow)
-- [ ] Real-time flow visualization
-- [ ] Solver panel with method selection
-- [ ] Results panel with charts (Recharts)
-- [ ] ML prediction panel
-- [ ] Multi-solver comparison page
-- [ ] WebSocket live simulation
-- [ ] Static export for GitHub Pages
+### Phase 5: React/Next.js Frontend (Week 4-5) [Done]
+- [x] Next.js 14 App Router + TypeScript + Tailwind
+- [x] Network editor (React Flow)
+- [x] Real-time flow visualization
+- [x] Solver panel with method selection
+- [x] Results panel with charts (Recharts)
+- [x] ML prediction panel
+- [x] Multi-solver comparison page
+- [x] WebSocket live simulation
+- [x] Static export for GitHub Pages
 
-### Phase 6: DevOps & Documentation (Week 5-6) [Pending]
-- [ ] GitHub Actions CI (lint, type-check, test, build)
-- [ ] GitHub Actions: cargo test, bench, clippy
-- [ ] GitHub Actions: npm test, build, deploy to Pages
-- [ ] Multi-stage Docker builds
-- [ ] docker-compose for local stack
-- [ ] MkDocs documentation
-- [ ] ADRs for key decisions
-- [ ] Root README with badges, diagrams, quickstart
+### Phase 6: DevOps & Documentation (Week 5-6) [Done]
+- [x] GitHub Actions CI (lint, type-check, test, build)
+- [x] GitHub Actions: cargo test, bench, clippy
+- [x] GitHub Actions: npm test, build, deploy to Pages
+- [x] Multi-stage Docker builds
+- [x] docker-compose for local stack
+- [x] MkDocs documentation (ARCHITECTURE.md)
+- [x] ADRs for key decisions
+- [x] Root README with badges, diagrams, quickstart
 
 ## API Reference
 

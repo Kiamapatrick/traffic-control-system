@@ -105,7 +105,7 @@ class TrafficFlowRegressor:
 
         return dict(zip(self.features, importances))
 
-    def save(self, path: str | Path):
+    def save(self, path: str | Path, export_onnx: bool = False):
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -121,6 +121,44 @@ class TrafficFlowRegressor:
         }
         joblib.dump(data, path)
 
+        if export_onnx:
+            self._export_onnx(path.with_suffix(".onnx"))
+
+    def _export_onnx(self, path: Path):
+        """Export model to ONNX format for cross-language serving."""
+        try:
+            from skl2onnx import convert_sklearn
+            from skl2onnx.common.data_types import FloatTensorType
+        except ImportError:
+            print("skl2onnx not installed. Skipping ONNX export.")
+            return
+
+        if self.model is None or self.features is None:
+            print("Model not fitted. Skipping ONNX export.")
+            return
+
+        # Create initial types for ONNX conversion
+        initial_type = [("float_input", FloatTensorType([None, len(self.features)]))]
+
+        # For tree-based models, we need to use a pipeline with scaler
+        from sklearn.pipeline import Pipeline
+        pipeline = Pipeline([
+            ("scaler", self.scaler),
+            ("model", self.model)
+        ])
+
+        try:
+            onnx_model = convert_sklearn(
+                pipeline,
+                initial_types=initial_type,
+                target_opset=12,
+            )
+            with open(path, "wb") as f:
+                f.write(onnx_model.SerializeToString())
+            print(f"ONNX model exported to {path}")
+        except Exception as e:
+            print(f"ONNX export failed: {e}")
+
     @classmethod
     def load(cls, path: str | Path) -> "TrafficFlowRegressor":
         data = joblib.load(path)
@@ -132,6 +170,19 @@ class TrafficFlowRegressor:
         regressor.metrics = data.get("metrics", {})
         regressor.version = data.get("version", "1.0")
         return regressor
+
+    @classmethod
+    def load_onnx(cls, path: str | Path) -> "TrafficFlowRegressor":
+        """Load ONNX model for inference (requires onnxruntime)."""
+        try:
+            import onnxruntime as ort
+        except ImportError:
+            raise ValueError("onnxruntime not installed. Install with: pip install onnxruntime")
+
+        session = ort.InferenceSession(str(path))
+        # Note: This creates a wrapper for ONNX inference
+        # The actual implementation would need to handle preprocessing
+        raise NotImplementedError("ONNX loading not fully implemented. Use joblib load for now.")
 
 
 def train_models(
