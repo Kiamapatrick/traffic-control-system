@@ -144,7 +144,7 @@ traffic-control-system/
 - [x] Unit tests (80%+), property-based tests (Hypothesis)
 - [x] Integration tests for API
 
-### Phase 2: ML Pipeline with SUMO Data (Week 2-3) 🔄
+### Phase 2: ML Pipeline with SUMO Data (Week 2-3) [In Progress]
 - [ ] SUMO simulation setup & network generation
 - [ ] Data pipeline: SUMO → features → training data
 - [ ] Feature engineering: time, topology, demand patterns
@@ -154,7 +154,7 @@ traffic-control-system/
 - [ ] `/predict` endpoint with model versioning
 - [ ] Notebook: `sumo_ml_pipeline.ipynb`
 
-### Phase 3: Rust Implementation (Week 3-4) ⏳
+### Phase 3: Rust Implementation (Week 3-4) [Pending]
 - [ ] Cargo workspace with nalgebra, petgraph, clap
 - [ ] Domain models with serde
 - [ ] RREF solver (nalgebra)
@@ -164,7 +164,7 @@ traffic-control-system/
 - [ ] Criterion benchmarks vs Python
 - [ ] Optional: WASM compilation
 
-### Phase 4: TypeScript Implementation (Week 4) ⏳
+### Phase 4: TypeScript Implementation (Week 4) [Pending]
 - [ ] Types matching Python Pydantic models
 - [ ] Gaussian elimination in TS
 - [ ] Simplex implementation
@@ -172,7 +172,7 @@ traffic-control-system/
 - [ ] Vitest tests with shared fixtures
 - [ ] Benchmark comparison page
 
-### Phase 5: React/Next.js Frontend (Week 4-5) ⏳
+### Phase 5: React/Next.js Frontend (Week 4-5) [Pending]
 - [ ] Next.js 14 App Router + TypeScript + Tailwind
 - [ ] Network editor (React Flow)
 - [ ] Real-time flow visualization
@@ -183,7 +183,7 @@ traffic-control-system/
 - [ ] WebSocket live simulation
 - [ ] Static export for GitHub Pages
 
-### Phase 6: DevOps & Documentation (Week 5-6) ⏳
+### Phase 6: DevOps & Documentation (Week 5-6) [Pending]
 - [ ] GitHub Actions CI (lint, type-check, test, build)
 - [ ] GitHub Actions: cargo test, bench, clippy
 - [ ] GitHub Actions: npm test, build, deploy to Pages
