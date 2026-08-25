@@ -1,0 +1,89 @@
+{
+  "junctions": [
+    {
+      "id": "A",
+      "position": [200.0, 600.0],
+      "junction_type": "source",
+      "external_flow": 80.0
+    },
+    {
+      "id": "B",
+      "position": [800.0, 600.0],
+      "junction_type": "sink",
+      "external_flow": -30.0
+    },
+    {
+      "id": "C",
+      "position": [800.0, 200.0],
+      "junction_type": "source",
+      "external_flow": 50.0
+    },
+    {
+      "id": "D",
+      "position": [200.0, 200.0],
+      "junction_type": "sink",
+      "external_flow": -100.0
+    }
+  ],
+  "roads": [
+    {
+      "id": "x1",
+      "source": "A",
+      "target": "B",
+      "capacity": 100.0,
+      "length": 6.0,
+      "flow": 0.0,
+      "cost_per_unit": 1.0,
+      "free_flow_speed": 50.0,
+      "lanes": 1
+    },
+    {
+      "id": "x2",
+      "source": "B",
+      "target": "C",
+      "capacity": 100.0,
+      "length": 4.0,
+      "flow": 0.0,
+      "cost_per_unit": 1.0,
+      "free_flow_speed": 50.0,
+      "lanes": 1
+    },
+    {
+      "id": "x3",
+      "source": "C",
+      "target": "D",
+      "capacity": 100.0,
+      "length": 6.0,
+      "flow": 0.0,
+      "cost_per_unit": 1.0,
+      "free_flow_speed": 50.0,
+      "lanes": 1
+    },
+    {
+      "id": "x4",
+      "source": "D",
+      "target": "A",
+      "capacity": 100.0,
+      "length": 4.0,
+      "flow": 0.0,
+      "cost_per_unit": 1.0,
+      "free_flow_speed": 50.0,
+      "lanes": 1
+    },
+    {
+      "id": "x5",
+      "source": "B",
+      "target": "D",
+      "capacity": 100.0,
+      "length": 6.3,
+      "flow": 0.0,
+      "cost_per_unit": 1.0,
+      "free_flow_speed": 50.0,
+      "lanes": 1
+    }
+  ],
+  "metadata": {
+    "description": "Four junction traffic network from linear algebra coursework",
+    "source": "Traffic Control System - RREF Solution"
+  }
+}

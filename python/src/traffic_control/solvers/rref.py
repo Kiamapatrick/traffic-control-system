@@ -128,8 +128,15 @@ def find_feasible_solution(
 
     c = np.zeros(nullspace.shape[1])
 
-    A_ub = np.vstack([-nullspace.T, nullspace.T])
-    b_ub = np.hstack([particular, np.array([get_capacity(network, rid) for rid in road_ids]) - particular])
+    # Constraints for x = particular + nullspace @ y:
+    # x >= 0  =>  nullspace @ y >= -particular  =>  -nullspace @ y <= particular
+    # x <= capacity  =>  nullspace @ y <= capacity - particular
+    # A_ub @ y <= b_ub
+    # A_ub is (2*n, nullity), b_ub is (2*n,)
+    capacities = np.array([get_capacity(network, rid) for rid in road_ids])
+
+    A_ub = np.vstack([-nullspace, nullspace])  # (2*n, nullity)
+    b_ub = np.hstack([particular, capacities - particular])  # (2*n,)
 
     bounds = [(None, None)] * nullspace.shape[1]
 
@@ -180,10 +187,10 @@ def solve_rref(network: "Network") -> "FlowSolution":
     )
 
 
-def validate_solution(network: "Network", solution: "FlowSolution") -> tuple[bool, list[str]]:
+def validate_solution(network: "Network", solution: "FlowSolution | dict") -> tuple[bool, list[str]]:
     violations = []
 
-    flow_dict = solution.flows
+    flow_dict = solution.flows if hasattr(solution, 'flows') else solution
     junction_to_idx = {j.id: i for i, j in enumerate(network.junctions)}
 
     for junction in network.junctions:
