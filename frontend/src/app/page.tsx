@@ -17,7 +17,7 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           <Link href="/solver" className="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-shadow border border-gray-200 dark:border-gray-700">
-            <div className="text-4xl mb-3">🔧</div>
+            <div className="text-4xl mb-3">Tools</div>
             <h3 className="text-xl font-semibold mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
               Network Solver
             </h3>
@@ -27,7 +27,7 @@ export default function Home() {
           </Link>
 
           <Link href="/ml" className="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-shadow border border-gray-200 dark:border-gray-700">
-            <div className="text-4xl mb-3">🤖</div>
+            <div className="text-4xl mb-3">ML</div>
             <h3 className="text-xl font-semibold mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
               ML Prediction
             </h3>
@@ -37,7 +37,7 @@ export default function Home() {
           </Link>
 
           <Link href="/compare" className="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-shadow border border-gray-200 dark:border-gray-700">
-            <div className="text-4xl mb-3">📊</div>
+            <div className="text-4xl mb-3">Chart</div>
             <h3 className="text-xl font-semibold mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
               Solver Comparison
             </h3>
@@ -51,17 +51,17 @@ export default function Home() {
           <h2 className="text-3xl font-bold mb-8 text-center">Features</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: '⚡', title: 'High Performance', desc: 'Rust implementation 10-50x faster than Python' },
-              { icon: '🌐', title: 'Multi-Language', desc: 'Python, Rust, and TypeScript implementations' },
-              { icon: '🔐', title: 'Secure API', desc: 'JWT authentication with role-based access' },
-              { icon: '🗄️', title: 'Persistent Storage', desc: 'MongoDB for network and model persistence' },
-              { icon: '📈', title: 'ML Integration', desc: 'Train and serve traffic prediction models' },
-              { icon: '🎨', title: 'Interactive UI', desc: 'React Flow network editor with live visualization' },
-              { icon: '🧪', title: 'Well Tested', desc: 'Property-based tests, integration tests, benchmarks' },
-              { icon: '🐳', title: 'Containerized', desc: 'Docker and docker-compose for easy deployment' },
+              { icon: 'Perf', title: 'High Performance', desc: 'Rust implementation 10-50x faster than Python' },
+              { icon: 'Multi', title: 'Multi-Language', desc: 'Python, Rust, and TypeScript implementations' },
+              { icon: 'Auth', title: 'Secure API', desc: 'JWT authentication with role-based access' },
+              { icon: 'DB', title: 'Persistent Storage', desc: 'MongoDB for network and model persistence' },
+              { icon: 'ML', title: 'ML Integration', desc: 'Train and serve traffic prediction models' },
+              { icon: 'UI', title: 'Interactive UI', desc: 'React Flow network editor with live visualization' },
+              { icon: 'Test', title: 'Well Tested', desc: 'Property-based tests, integration tests, benchmarks' },
+              { icon: 'Docker', title: 'Containerized', desc: 'Docker and docker-compose for easy deployment' },
             ].map((feature, i) => (
               <div key={i} className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
-                <div className="text-3xl mb-3">{feature.icon}</div>
+                <div className="text-lg font-mono font-bold mb-3 text-primary-600 dark:text-primary-400">{feature.icon}</div>
                 <h4 className="font-semibold mb-1">{feature.title}</h4>
                 <p className="text-sm text-gray-600 dark:text-gray-300">{feature.desc}</p>
               </div>

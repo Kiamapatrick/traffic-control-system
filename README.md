@@ -130,7 +130,7 @@ traffic-control-system/
 
 ## Development Phases
 
-### Phase 1: Python Core Package (Week 1-2) ✅
+### Phase 1: Python Core Package (Week 1-2) [Done]
 - [x] Project structure with `pyproject.toml` (uv)
 - [x] Domain models: Network, Junction, Road, FlowSolution
 - [x] RREF solver (ported from notebook)
