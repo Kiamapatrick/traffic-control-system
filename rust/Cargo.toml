@@ -1,0 +1,26 @@
+[package]
+name = "traffic-control-rs"
+version = "0.1.0"
+edition = "2021"
+description = "High-performance traffic flow solver in Rust"
+license = "MIT"
+
+[dependencies]
+nalgebra = "0.32"
+petgraph = "0.6"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+clap = { version = "4.4", features = ["derive"] }
+thiserror = "1.0"
+rayon = "1.10"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[profile.release]
+lto = true
+opt-level = 3
+
+[[bench]]
+name = "solver_bench"
+harness = false

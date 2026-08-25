@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.python
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/traffic_control
+      - JWT_SECRET=your-secret-key-change-in-production
+      - JWT_ALGORITHM=HS256
+      - JWT_EXPIRE_MINUTES=30
+      - SUMO_HOME=/usr/share/sumo
+    depends_on:
+      - mongodb
+    volumes:
+      - ../python:/app
+      - ../data:/app/data
+    command: uv run uvicorn traffic_control.api.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=traffic_control
+
+  rust-cli:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.rust
+    volumes:
+      - ../rust:/app
+      - ../data:/app/data
+    command: --help
+
+volumes:
+  mongodb_data:

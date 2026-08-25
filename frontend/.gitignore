@@ -1,0 +1,26 @@
+# Frontend
+.next/
+out/
+node_modules/
+*.log
+npm-debug.log*
+.yarn-integrity
+
+# Testing
+coverage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# TypeScript
+*.tsbuildinfo

@@ -1,0 +1,94 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Python - uv
+uv.lock
+
+# Rust
+target/
+Cargo.lock
+*.rs.bk
+
+# TypeScript
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+.eslintcache
+
+# Frontend
+.next/
+out/
+node_modules/
+*.log
+npm-debug.log*
+.yarn-integrity
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Docker
+.docker/
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data
+data/raw/
+data/sumo/
+models/*.joblib
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Benchmarks
+*.json
+!package.json
+!tsconfig.json
+!*.config.json

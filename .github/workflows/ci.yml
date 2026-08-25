@@ -1,0 +1,208 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  python:
+    name: Python (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            python/.venv
+          key: ${{ runner.os }}-python-${{ matrix.python-version }}-${{ hashFiles('python/pyproject.toml', 'python/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-python-${{ matrix.python-version }}-
+
+      - name: Install dependencies
+        run: cd python && uv sync --all-extras
+
+      - name: Run lint
+        run: cd python && uv run ruff check src tests
+
+      - name: Run format check
+        run: cd python && uv run ruff format --check src tests
+
+      - name: Run type check
+        run: cd python && uv run mypy src
+
+      - name: Run tests
+        run: cd python && uv run pytest -v --cov=traffic_control --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: python/coverage.xml
+          flags: python
+
+  rust:
+    name: Rust
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: ${{ runner.os }}-rust-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-rust-
+
+      - name: Run clippy
+        run: cd rust && cargo clippy -- -D warnings
+
+      - name: Run tests
+        run: cd rust && cargo test --verbose
+
+      - name: Run benchmarks
+        run: cd rust && cargo bench -- --no-plots
+
+  typescript:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: typescript/package-lock.json
+
+      - name: Install dependencies
+        run: cd typescript && npm ci
+
+      - name: Run lint
+        run: cd typescript && npm run lint
+
+      - name: Run tests
+        run: cd typescript && npm test
+
+      - name: Build
+        run: cd typescript && npm run build
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: cd frontend && npm ci
+
+      - name: Run lint
+        run: cd frontend && npm run lint
+
+      - name: Run tests
+        run: cd frontend && npm test
+
+      - name: Build
+        run: cd frontend && npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/out/
+          retention-days: 1
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [python, rust, typescript, frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Python image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.python
+          push: false
+          tags: traffic-control-python:latest
+          load: true
+
+      - name: Build Rust image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.rust
+          push: false
+          tags: traffic-control-rust:latest
+          load: true
+
+      - name: Build Frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.frontend
+          push: false
+          tags: traffic-control-frontend:latest
+          load: true
+
+  summary:
+    name: Summary
+    runs-on: ubuntu-latest
+    needs: [python, rust, typescript, frontend, docker]
+    if: always()
+    steps:
+      - name: Check job statuses
+        run: |
+          echo "Python: ${{ needs.python.result }}"
+          echo "Rust: ${{ needs.rust.result }}"
+          echo "TypeScript: ${{ needs.typescript.result }}"
+          echo "Frontend: ${{ needs.frontend.result }}"
+          echo "Docker: ${{ needs.docker.result }}"
+          if [[ "${{ needs.python.result }}" != "success" ]] || \
+             [[ "${{ needs.rust.result }}" != "success" ]] || \
+             [[ "${{ needs.typescript.result }}" != "success" ]] || \
+             [[ "${{ needs.frontend.result }}" != "success" ]] || \
+             [[ "${{ needs.docker.result }}" != "success" ]]; then
+            exit 1
+          fi
