@@ -6,7 +6,7 @@ export function generateFourJunction(): Network {
       { id: 'A', position: [200, 600], junctionType: 'source', externalFlow: 80 },
       { id: 'B', position: [800, 600], junctionType: 'sink', externalFlow: -30 },
       { id: 'C', position: [800, 200], junctionType: 'source', externalFlow: 50 },
-      { id: 'D', position: [200, 200], junctionType: 'sink', externalFlow: -60 },
+      { id: 'D', position: [200, 200], junctionType: 'sink', externalFlow: -100 },
     ],
     roads: [
       { id: 'x1', source: 'A', target: 'B', capacity: 100, length: 6, flow: 0, costPerUnit: 1, freeFlowSpeed: 50, lanes: 1 },

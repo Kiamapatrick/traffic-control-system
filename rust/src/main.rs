@@ -176,7 +176,7 @@ fn generate_four_junction() -> Network {
             Junction { id: "A".into(), position: [200.0, 600.0], junction_type: JunctionType::Source, external_flow: 80.0 },
             Junction { id: "B".into(), position: [800.0, 600.0], junction_type: JunctionType::Sink, external_flow: -30.0 },
             Junction { id: "C".into(), position: [800.0, 200.0], junction_type: JunctionType::Source, external_flow: 50.0 },
-            Junction { id: "D".into(), position: [200.0, 200.0], junction_type: JunctionType::Sink, external_flow: -60.0 },
+            Junction { id: "D".into(), position: [200.0, 200.0], junction_type: JunctionType::Sink, external_flow: -100.0 },
         ],
         roads: vec![
             Road { id: "x1".into(), source: "A".into(), target: "B".into(), capacity: 100.0, length: 6.0, flow: 0.0, cost_per_unit: 1.0, free_flow_speed: 50.0, lanes: 1 },
