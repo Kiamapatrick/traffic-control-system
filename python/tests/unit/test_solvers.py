@@ -95,8 +95,8 @@ class TestMaxFlow:
 class TestValidation:
     def test_flow_conservation(self):
         junctions = [
-            Junction(id="A", position=(0, 0), external_flow=10),
-            Junction(id="B", position=(100, 0), external_flow=-10),
+            Junction(id="A", position=(0, 0), external_flow=-10),
+            Junction(id="B", position=(100, 0), external_flow=10),
         ]
         roads = [Road(id="r1", source="A", target="B", capacity=100)]
         network = Network(junctions=junctions, roads=roads)

@@ -109,7 +109,7 @@ def generate_four_junction_example() -> "Network":
         Junction(id="A", position=(200, 600), external_flow=80),
         Junction(id="B", position=(800, 600), external_flow=-30),
         Junction(id="C", position=(800, 200), external_flow=50),
-        Junction(id="D", position=(200, 200), external_flow=-60),
+        Junction(id="D", position=(200, 200), external_flow=-100),
     ]
 
     roads = [

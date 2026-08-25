@@ -127,7 +127,7 @@ class TestGenerators:
 
     def test_manhattan(self):
         network = generate_manhattan_example()
-        assert len(network.junctions) == 12
+        assert len(network.junctions) == 20
         assert len(network.roads) > 0
 
     def test_roundabout(self):

@@ -48,16 +48,19 @@ def build_lp_problem(
         b_eq[idx] = junction.external_flow
 
     c = np.zeros(n_roads)
-    if objective is None or objective.value == "min_cost":
+    obj_value = objective.value if objective is not None else "min_cost"
+    if obj_value == "min_cost":
         for road in network.roads:
             c[road_to_idx[road.id]] = road.cost_per_unit
-    elif objective.value == "max_throughput":
+    elif obj_value == "max_throughput":
         for road in network.roads:
             c[road_to_idx[road.id]] = -1.0
-    elif objective.value == "min_travel_time":
+    elif obj_value == "min_travel_time":
         for road in network.roads:
             c[road_to_idx[road.id]] = road.length / road.free_flow_speed
-    elif objective.value == "balance_load":
+    elif obj_value == "balance_load":
+        for road in network.roads:
+            c[road_to_idx[road.id]] = (1.0 / road.capacity) ** 2
         for road in network.roads:
             c[road_to_idx[road.id]] = (1.0 / road.capacity) ** 2
 
@@ -67,8 +70,12 @@ def build_lp_problem(
     return c, A_eq, b_eq, bounds, road_ids
 
 
-def solve_lp(network: "Network", objective: "OptimizationObjective" = None) -> "FlowSolution":
-    from traffic_control.models import FlowSolution, SolverMethod
+def solve_lp(network: "Network", objective: "OptimizationObjective | str" = None) -> "FlowSolution":
+    from traffic_control.models import FlowSolution, SolverMethod, OptimizationObjective
+
+    # Convert string to enum if needed
+    if isinstance(objective, str):
+        objective = OptimizationObjective(objective)
 
     c, A_eq, b_eq, bounds, road_ids = build_lp_problem(network, objective)
 

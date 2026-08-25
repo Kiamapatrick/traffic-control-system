@@ -59,6 +59,12 @@ class Road(BaseModel):
             raise ValueError("Junction ID cannot be empty")
         return v
 
+    @model_validator(mode="after")
+    def validate_source_target(self) -> Road:
+        if self.source == self.target:
+            raise ValueError("source and target cannot be the same")
+        return self
+
 
 class Network(BaseModel):
     junctions: list[Junction] = Field(min_length=1)
