@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, Optional
 from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic.types import NonNegativeFloat, PositiveFloat, PositiveInt
+from beanie import Document
 
 
 class SolverMethod(str, Enum):
@@ -191,3 +192,15 @@ class PredictionResponse(BaseModel):
     predictions: dict[str, float]
     model_id: str
     model_version: str
+
+
+class NetworkDocument(Document):
+    name: str
+    network: Network
+    description: Optional[str] = None
+    tags: list[str] = Field(default_factory=list)
+    created_at: str
+    updated_at: str
+
+    class Settings:
+        name = "networks"

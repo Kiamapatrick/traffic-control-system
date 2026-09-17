@@ -6,15 +6,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime, timedelta, timezone
-from typing import Annotated
+from typing import Annotated, Optional
 import motor.motor_asyncio
-from beanie import init_beanie
+from beanie import init_beanie, Document
 
 from traffic_control.models import (
     Network, FlowSolution, SolveRequest, SolveResponse,
-    NetworkCreate, NetworkResponse, Token, TokenData, User,
+    NetworkCreate, NetworkResponse, NetworkDocument, Token, TokenData, User,
     PredictionRequest, PredictionResponse, MLModelInfo,
     SolverMethod, OptimizationObjective
 )
@@ -29,8 +29,16 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
-class UserInDB(User):
+class UserInDB(Document):
+    username: str
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    disabled: bool = False
     hashed_password: str
+    scopes: list[str] = []
+    
+    class Settings:
+        name = "users"
 
 
 class Settings(BaseModel):
@@ -68,7 +76,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     return jwt.encode(to_encode, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserInDB:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -83,14 +91,13 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Use
     except JWTError:
         raise credentials_exception
 
-    db = await get_database()
-    user = await db.users.find_one({"username": token_data.username})
+    user = await UserInDB.find_one(UserInDB.username == token_data.username)
     if user is None:
         raise credentials_exception
-    return User(**user)
+    return user
 
 
-async def get_current_active_user(current_user: Annotated[User, Depends(get_current_user)]) -> User:
+async def get_current_active_user(current_user: Annotated[UserInDB, Depends(get_current_user)]) -> UserInDB:
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
@@ -120,36 +127,46 @@ app.add_middleware(
 
 @app.post("/api/v1/auth/register", response_model=User)
 async def register(user_data: UserInDB):
-    db = await get_database()
-    existing = await db.users.find_one({"username": user_data.username})
+    existing = await UserInDB.find_one(UserInDB.username == user_data.username)
     if existing:
         raise HTTPException(status_code=400, detail="Username already registered")
 
     hashed = get_password_hash(user_data.hashed_password)
-    user_doc = user_data.model_dump()
-    user_doc["hashed_password"] = hashed
-    await db.users.insert_one(user_doc)
-    return User(**user_data.model_dump(exclude={"hashed_password"}))
+    user_doc = UserInDB(
+        username=user_data.username,
+        email=user_data.email,
+        full_name=user_data.full_name,
+        disabled=user_data.disabled,
+        hashed_password=hashed,
+        scopes=user_data.scopes,
+    )
+    await user_doc.insert()
+    return User(
+        username=user_doc.username,
+        email=user_doc.email,
+        full_name=user_doc.full_name,
+        disabled=user_doc.disabled,
+        scopes=user_doc.scopes,
+    )
 
 
 @app.post("/api/v1/auth/login", response_model=Token)
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    db = await get_database()
-    user = await db.users.find_one({"username": form_data.username})
-    if not user or not verify_password(form_data.password, user["hashed_password"]):
+    user = await UserInDB.find_one(UserInDB.username == form_data.username)
+    if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = create_access_token(data={"sub": user["username"]})
+    access_token = create_access_token(data={"sub": user.username})
     return Token(access_token=access_token, expires_in=settings.jwt_expire_minutes * 60)
 
 
 @app.post("/api/v1/solve", response_model=SolveResponse)
 async def solve_network(
     request: SolveRequest,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
 ):
     import time
 
@@ -203,56 +220,77 @@ async def solve_network(
 @app.post("/api/v1/networks", response_model=NetworkResponse)
 async def create_network(
     network_data: NetworkCreate,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
 ):
-    db = await get_database()
-    network_doc = network_data.model_dump()
-    network_doc["created_at"] = datetime.now(timezone.utc).isoformat()
-    network_doc["updated_at"] = network_doc["created_at"]
-    result = await db.networks.insert_one(network_doc)
-    network_doc["id"] = str(result.inserted_id)
-    return NetworkResponse(**network_doc)
+    network_doc = NetworkDocument(
+        name=network_data.name,
+        network=network_data.network,
+        description=network_data.description,
+        tags=network_data.tags,
+        created_at=datetime.now(timezone.utc).isoformat(),
+        updated_at=datetime.now(timezone.utc).isoformat(),
+    )
+    await network_doc.insert()
+    return NetworkResponse(
+        id=str(network_doc.id),
+        name=network_doc.name,
+        network=network_doc.network,
+        description=network_doc.description,
+        tags=network_doc.tags,
+        created_at=network_doc.created_at,
+        updated_at=network_doc.updated_at,
+    )
 
 
 @app.get("/api/v1/networks/{network_id}", response_model=NetworkResponse)
 async def get_network(
     network_id: str,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
 ):
-    db = await get_database()
-    from bson import ObjectId
-    network = await db.networks.find_one({"_id": ObjectId(network_id)})
+    network = await NetworkDocument.get(network_id)
     if not network:
         raise HTTPException(status_code=404, detail="Network not found")
-    network["id"] = str(network["_id"])
-    return NetworkResponse(**network)
+    return NetworkResponse(
+        id=str(network.id),
+        name=network.name,
+        network=network.network,
+        description=network.description,
+        tags=network.tags,
+        created_at=network.created_at,
+        updated_at=network.updated_at,
+    )
 
 
 @app.get("/api/v1/networks", response_model=list[NetworkResponse])
 async def list_networks(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
     limit: int = 100,
     offset: int = 0,
 ):
-    db = await get_database()
-    cursor = db.networks.find().skip(offset).limit(limit)
-    networks = []
-    async for doc in cursor:
-        doc["id"] = str(doc["_id"])
-        networks.append(NetworkResponse(**doc))
-    return networks
+    networks = await NetworkDocument.find_all().skip(offset).limit(limit).to_list()
+    return [
+        NetworkResponse(
+            id=str(network.id),
+            name=network.name,
+            network=network.network,
+            description=network.description,
+            tags=network.tags,
+            created_at=network.created_at,
+            updated_at=network.updated_at,
+        )
+        for network in networks
+    ]
 
 
 @app.delete("/api/v1/networks/{network_id}")
 async def delete_network(
     network_id: str,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[UserInDB, Depends(get_current_active_user)],
 ):
-    db = await get_database()
-    from bson import ObjectId
-    result = await db.networks.delete_one({"_id": ObjectId(network_id)})
-    if result.deleted_count == 0:
+    network = await NetworkDocument.get(network_id)
+    if not network:
         raise HTTPException(status_code=404, detail="Network not found")
+    await network.delete()
     return {"message": "Network deleted"}
 
 

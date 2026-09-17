@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,7 +12,7 @@ class Settings(BaseSettings):
     sumo_home: str = "/usr/share/sumo"
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=Path(__file__).parent.parent.parent.parent / ".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
