@@ -1,6 +1,5 @@
 # Traffic Control System
 
-
 A multi-language, full-stack traffic flow optimization system demonstrating Python/Rust/TypeScript skills, ML integration, and production-grade engineering practices.
 
 
